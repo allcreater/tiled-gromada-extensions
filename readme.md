@@ -1,0 +1,1 @@
+An extensions for Tiled map editor to make it work with resources of an good old game Gromada
