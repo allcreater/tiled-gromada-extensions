@@ -4,7 +4,7 @@ function decodeFrame_format2(vidGraphics, frameData) {
     const image = new Image(vidGraphics.imgWidth, vidGraphics.imgHeight, Image.Format_RGBA8888)
     image.fill(0x00000000)
     
-    tiled.log(`len = ${frameData.byteLength}`)
+    //tiled.log(`len = ${frameData.byteLength}`)
 
     let dataView = new DataView(frameData)
     const startY = dataView.getUint16(0, true)
@@ -43,7 +43,9 @@ function decodeFrame_format2(vidGraphics, frameData) {
 }
 
 function decodeFrame(vidGraphics, frameIndex) {
-    const frameData = vidGraphics.frames[frameIndex].data
+    const frameData = vidGraphics.frames[frameIndex]?.data
+    if (!frameData)
+        return null
 
     const decodedImage = ({
         0 : () => {return new Image(frameData, vidGraphics.imgWidth, vidGraphics.imgHeight, Image.Format_Indexed8)},

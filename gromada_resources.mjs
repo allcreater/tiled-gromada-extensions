@@ -22,7 +22,7 @@ function readVid(data /*: DataView*/) {
         const dataSize = data.getUint32(graphicsOffset + 9, true)
 
         let framesData = data.buffer.slice(graphicsOffset + 17 + 0x300, graphicsOffset + 17 + dataSize)
-        let frames = []
+        const frames = []
         for (let i = 0; i < numOfFrames; ++i) {
             const header = new DataView(framesData, 0, 6)
 
@@ -35,7 +35,7 @@ function readVid(data /*: DataView*/) {
             })
             framesData = framesData.slice(4 + frameDataSize)
         }
-
+        
         return {
             dataFormat : data.getUint8(graphicsOffset + 4),
             hz7 : data.getUint16(graphicsOffset + 5, true),
@@ -44,7 +44,7 @@ function readVid(data /*: DataView*/) {
             imgWidth : data.getUint16(graphicsOffset + 13, true),
             imgHeight : data.getUint16(graphicsOffset + 15, true),
             palette : makeRGBA32Palette(data.buffer.slice(graphicsOffset + 17, graphicsOffset + 17 + 0x300)),
-            frames: frames
+            frames: frames,
         }
     }
 
@@ -80,12 +80,13 @@ function readVid(data /*: DataView*/) {
         hz6: data.getUint16(67, true),
         directionsCount: data.getUint8(69),
         z: data.getUint8(70),
+        animationLengths: new Int8Array(data.buffer, 71, 16),
 
         graphics : dataSizeOrNvid > 0 ? readGraphics() : -dataSizeOrNvid
     }
 }
 
-function readHeader(file) {
+function readSectionHeader(file) {
     let view = new DataView(file.read(11))
     let nextSectionOffset = view.getUint32(1, true)
     let dataOffset = view.getUint16(9, true)
@@ -100,12 +101,12 @@ function readHeader(file) {
 }
 
 
-function* readSectionsNew(file) {
+function* readSections(file) {
     file.seek(0)
     let sectionCount = new DataView(file.read(4)).getUint32(0, true)
     
     for (let i = 0; i < sectionCount; i++) {
-        const header = readHeader(file)
+        const header = readSectionHeader(file)
 
         const currentSectionPos = file.pos
         const nextSectionPos = currentSectionPos + header.dataSize
@@ -132,4 +133,4 @@ export const Section_Vid = 33
 export const Section_Sound = 34
 export const Section_Weapon = 35
 
-export {readSectionsNew, readVid, decodeFrame}
+export {readSections, readVid, readMapPreamble}
